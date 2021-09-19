@@ -2,28 +2,64 @@ package main
 
 import (
 	"fmt"
-	"github.com/gocolly/colly"
+	log "github.com/llimllib/loglevel"
+	"golang.org/x/net/html"
+	"golang.org/x/net/html/atom"
+	"net/http"
+	"os"
 	"strings"
 )
 
+type Link struct {
+	url string
+	text string
+	depth int
+}
+
+type HttpErrors struct {
+	original string
+}
+
+func LinkReader(resp *http.Response) []Link{
+	page := html.NewTokenizer(resp.Body)
+	links := []Link{}
+
+	var start *html.Token
+	var text string
+
+	for{
+		_ := page.Next()
+		token := page.Token()
+
+		if token.Type == html.ErrorToken
+	}
+}
 func main(){
-	c := colly.NewCollector()
+	baseUrl := "https://arzex.io/tether/"
+// 	"crypto/tls"
+//	config := &tls.Config{
+//		InsecureSkipVerify: true,
+//	}
+//
+//	transport := &http.Transport{
+//		TLSClientConfig: config,
+//	}
+//
+//	netClient := &http.Client{
+//		Transport: transport,
+//	}
+//	response, err := netClient.Get(baseUrl)
+//	checkErr(err)
 
-	c.OnHTML("#RWPCS-usdt-table-sellers tr:nth-child(1) > td:nth-child(2)", func(e *colly.HTMLElement) {
-		priceWithCurrency := e.Text
+	//body, err := ioutil.ReadAll(response.Body)
+	//defer response.Body.Close()
+	//checkErr(err)
 
-		BestSellPrice := strings.Replace(strings.Replace(priceWithCurrency,"تومان", "", 1), ",", "", 1)
+}
 
-		fmt.Println("Best seller: ", BestSellPrice)
-	})
-
-	c.OnHTML("#RWPCS-usdt-table-buyers tr:nth-child(1) > td:nth-child(2)", func(e *colly.HTMLElement) {
-		priceWithCurrency := e.Text
-
-		BestBuyPrice := strings.Replace(strings.Replace(priceWithCurrency,"تومان", "", 1), ",", "", 1)
-
-		fmt.Println("Best buyer: ", BestBuyPrice)
-	})
-
-	c.Visit("https://arzex.io/tether/")
+func checkErr(err error){
+	if err != nil{
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }
