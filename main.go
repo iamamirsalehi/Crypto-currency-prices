@@ -1,64 +1,54 @@
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
-	log "github.com/llimllib/loglevel"
-	"golang.org/x/net/html"
-	"golang.org/x/net/html/atom"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/PuerkitoBio/goquery"
 )
 
-type Link struct {
-	url string
-	text string
-	depth int
-}
+func main() {
+	baseUrl := "https://arzex.io/tether"
 
-type HttpErrors struct {
-	original string
-}
-
-func LinkReader(resp *http.Response) []Link{
-	page := html.NewTokenizer(resp.Body)
-	links := []Link{}
-
-	var start *html.Token
-	var text string
-
-	for{
-		_ := page.Next()
-		token := page.Token()
-
-		if token.Type == html.ErrorToken
+	config := &tls.Config{
+		InsecureSkipVerify: true,
 	}
+
+	transport := &http.Transport{
+		TLSClientConfig: config,
+	}
+
+	netClient := &http.Client{
+		Transport: transport,
+	}
+
+	resp, err := netClient.Get(baseUrl)
+	checkErr(err)
+	defer resp.Body.Close()
+
+	// Load the HTML document
+	doc, err := goquery.NewDocumentFromReader(resp.Body)
+	checkErr(err)
+
+	doc.Find("#RWPCS-usdt-table-sellers tr:nth-child(1) > td:nth-child(2)").Each(func(i int, s *goquery.Selection) {
+		BestSellPriceForClients := strings.Replace(strings.Replace(s.Text(), "تومان", "", -1), ",", "", -1)
+
+		fmt.Println(BestSellPriceForClients)
+	})
+
+	doc.Find("#RWPCS-usdt-table-buyers tr:nth-child(1) > td:nth-child(2)").Each(func(i int, s *goquery.Selection) {
+		BestBuyPriceForClients := strings.Replace(strings.Replace(s.Text(), "تومان", "", -1), ",", "", -1)
+
+		fmt.Println(BestBuyPriceForClients)
+	})
+
 }
-func main(){
-	baseUrl := "https://arzex.io/tether/"
-// 	"crypto/tls"
-//	config := &tls.Config{
-//		InsecureSkipVerify: true,
-//	}
-//
-//	transport := &http.Transport{
-//		TLSClientConfig: config,
-//	}
-//
-//	netClient := &http.Client{
-//		Transport: transport,
-//	}
-//	response, err := netClient.Get(baseUrl)
-//	checkErr(err)
 
-	//body, err := ioutil.ReadAll(response.Body)
-	//defer response.Body.Close()
-	//checkErr(err)
-
-}
-
-func checkErr(err error){
-	if err != nil{
+func checkErr(err error) {
+	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
