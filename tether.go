@@ -7,18 +7,17 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
-	v8 "rogchap.com/v8go"
 )
 
 type prices struct {
-	sellPrice int
-	buyPrice  int
+	name  string
+	price int
 }
 
-func GetArzexBestPrices() prices {
+func GetArzexBestBuyPrices() prices {
 	baseUrl := "https://arzex.io/tether"
 
-	arzexPrices := prices{}
+	prices := prices{}
 
 	netClient := GetClient()
 
@@ -30,26 +29,21 @@ func GetArzexBestPrices() prices {
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	checkErr(err)
 
-	doc.Find("#RWPCS-usdt-table-sellers tr:nth-child(1) > td:nth-child(2)").Each(func(i int, s *goquery.Selection) {
-		BestSellPriceForClients := strings.TrimSpace(strings.Replace(strings.Replace(s.Text(), "تومان", "", -1), ",", "", -1))
-
-		arzexPrices.sellPrice, err = strconv.Atoi(BestSellPriceForClients)
-		checkErr(err)
-	})
+	prices.name = doc.Find("#RWPCS-usdt-table-buyers tr:nth-child(1) > td:nth-child(1)").First().Text()
 
 	doc.Find("#RWPCS-usdt-table-buyers tr:nth-child(1) > td:nth-child(2)").Each(func(i int, s *goquery.Selection) {
-		BestBuyPriceForClients := strings.TrimSpace(strings.Replace(strings.Replace(s.Text(), "تومان", "", -1), ",", "", -1))
+		BestBuyPriceForClients := removeTomanFromText(s.Text())
 
-		arzexPrices.buyPrice, err = strconv.Atoi(BestBuyPriceForClients)
+		prices.price, err = strconv.Atoi(BestBuyPriceForClients)
 		checkErr(err)
 	})
-	return arzexPrices
+	return prices
 }
 
-func GetNobitexPrices() {
+func GetArzexBestSellPrices() prices {
 	baseUrl := "https://arzex.io/tether"
 
-	//nobitexPrices := prices{}
+	prices := prices{}
 
 	netClient := GetClient()
 
@@ -58,18 +52,73 @@ func GetNobitexPrices() {
 	defer resp.Body.Close()
 
 	// Load the HTML document
-	// doc, err := goquery.NewDocumentFromReader(resp.Body)
-	// checkErr(err)
-	fmt.Println("asdads")
-	// #RWPCS-usdt-table-sellers tr a[href^='https://nobitex.ir/']::parent + td:nth-child(2)
-
-	ctx, _ := v8.NewContext()
-
-	val, err := ctx.RunScript("document.querySelector('#RWPCS-usdt-table-sellers tr a[href^=\"https://nobitex.ir/\"]').parentNode.parentNode", "main.js")
+	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	checkErr(err)
 
-	fmt.Println(val)
+	prices.name = doc.Find("#RWPCS-usdt-table-buyers tr:nth-child(1) > td:nth-child(1)").First().Text()
 
+	doc.Find("#RWPCS-usdt-table-sellers tr:nth-child(1) > td:nth-child(2)").Each(func(i int, s *goquery.Selection) {
+		BestSellPriceForClients := removeTomanFromText(s.Text())
+
+		prices.price, err = strconv.Atoi(BestSellPriceForClients)
+		checkErr(err)
+	})
+
+	return prices
+}
+
+func GetNobitexSellPrices() prices{
+	baseUrl := "https://arzex.io/tether"
+
+	netClient := GetClient()
+
+	resp, err := netClient.Get(baseUrl)
+	checkErr(err)
+	defer resp.Body.Close()
+
+	// Load the HTML document
+	doc, err := goquery.NewDocumentFromReader(resp.Body)
+	checkErr(err)
+
+	price, err := strconv.Atoi(
+		removeTomanFromText(
+			doc.Find("#RWPCS-usdt-table-sellers tr a[href^='https://nobitex.ir/']").Parent().Parent().Find("td:nth-child(2)").Text(),
+		),
+	)
+
+	nobitexSellPrice := prices{
+		name:  "Nobitex",
+		price: price,
+	}
+
+	return nobitexSellPrice
+}
+
+func GetNobitexBuyPrices() prices{
+	baseUrl := "https://arzex.io/tether"
+
+	netClient := GetClient()
+
+	resp, err := netClient.Get(baseUrl)
+	checkErr(err)
+	defer resp.Body.Close()
+
+	// Load the HTML document
+	doc, err := goquery.NewDocumentFromReader(resp.Body)
+	checkErr(err)
+
+	price, err := strconv.Atoi(
+		removeTomanFromText(
+			doc.Find("#RWPCS-usdt-table-buyers tr a[href^='https://nobitex.ir/']").Parent().Parent().Find("td:nth-child(2)").Text(),
+		),
+	)
+
+	nobitexBuyPrice := prices{
+		name:  "Nobitex",
+		price: price,
+	}
+
+	return nobitexBuyPrice
 }
 
 func checkErr(err error) {
@@ -77,4 +126,8 @@ func checkErr(err error) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+}
+
+func removeTomanFromText(text string) string {
+	return strings.TrimSpace(strings.Replace(strings.Replace(text, "تومان", "", -1), ",", "", -1))
 }
