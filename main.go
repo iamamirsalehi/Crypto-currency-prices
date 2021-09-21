@@ -1,9 +1,8 @@
 package main
 
-import "fmt"
-
 func main(){
-	arzexBestPrices := GetArzexBestPrices()
-
-	fmt.Println(arzexBestPrices)
+	GetNobitexPrices()
+	//arzexBestPrices := GetNobitexPrices()
+	//
+	//fmt.Println(arzexBestPrices)
 }
