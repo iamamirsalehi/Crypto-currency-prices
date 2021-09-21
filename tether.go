@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
+	v8 "rogchap.com/v8go"
 )
 
 type prices struct {
@@ -60,14 +61,14 @@ func GetNobitexPrices() {
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	checkErr(err)
 	fmt.Println("asdads")
+	// #RWPCS-usdt-table-sellers tr a[href^='https://nobitex.ir/']::parent + td:nth-child(2)
 
-	doc.Find("#RWPCS-usdt-table-sellers tr a[href^='https://nobitex.ir/']::parent + td:nth-child(2)").Each(func(i int, s *goquery.Selection) {
-		fmt.Println(s.Text())
-/*		BestSellPriceForClients := strings.TrimSpace(strings.Replace(strings.Replace(s.Text(), "تومان", "", -1), ",", "", -1))
+	ctx, _ := v8.NewContext()
 
-		nobitexPrices.sellPrice, err = strconv.Atoi(BestSellPriceForClients)
-		checkErr(err)*/
-	})
+	val, err := ctx.RunScript("document.querySelector('#RWPCS-usdt-table-sellers tr a[href^=\"https://nobitex.ir/\"]').parentNode.parentNode", "main.js")
+	checkErr(err)
+
+	fmt.Println(val)
 
 }
 
