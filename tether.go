@@ -58,8 +58,8 @@ func GetNobitexPrices() {
 	defer resp.Body.Close()
 
 	// Load the HTML document
-	doc, err := goquery.NewDocumentFromReader(resp.Body)
-	checkErr(err)
+	// doc, err := goquery.NewDocumentFromReader(resp.Body)
+	// checkErr(err)
 	fmt.Println("asdads")
 	// #RWPCS-usdt-table-sellers tr a[href^='https://nobitex.ir/']::parent + td:nth-child(2)
 
