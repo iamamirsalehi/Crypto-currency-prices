@@ -87,13 +87,13 @@ func GetNobitexSellPrices() prices {
 }
 
 func GetNobitexBuyPrices() prices {
-	sellPriceCrawler := crawlType{
+	buyPriceCrawler := crawlType{
 		englishName:    "Nobitex",
 		persianName:    "نوبیتکس",
 		baseWebsiteUrl: "https://nobitex.ir/",
 		isSellPrice:    false,
 	}
-	return base(sellPriceCrawler)
+	return base(buyPriceCrawler)
 }
 
 func GetPhinixSellPrices() prices {
@@ -107,15 +107,74 @@ func GetPhinixSellPrices() prices {
 }
 
 func GetPhinixBuyPrices() prices {
-	sellPriceCrawler := crawlType{
+	buyPriceCrawler := crawlType{
 		englishName:    "Phinix",
 		persianName:    "فینیکس",
 		baseWebsiteUrl: "https://phinix.ir/",
 		isSellPrice:    false,
 	}
+	return base(buyPriceCrawler)
+}
+
+func GetTabdealSellPrices() prices {
+	sellPriceCrawler := crawlType{
+		englishName:    "Tabdeal",
+		persianName:    "تبدیل",
+		baseWebsiteUrl: "https://tabdeal.org/",
+		isSellPrice:    true,
+	}
 	return base(sellPriceCrawler)
 }
 
+func GetTabdealBuyPrices() prices {
+	buyPriceCrawler := crawlType{
+		englishName:    "Tabdeal",
+		persianName:    "تبدیل",
+		baseWebsiteUrl: "https://tabdeal.org/",
+		isSellPrice:    false,
+	}
+	return base(buyPriceCrawler)
+}
+
+func GetAbantetherSellPrices() prices {
+	sellPriceCrawler := crawlType{
+		englishName:    "Aban tether",
+		persianName:    "آبان تتر",
+		baseWebsiteUrl: "https://abantether.com/",
+		isSellPrice:    true,
+	}
+	return base(sellPriceCrawler)
+}
+
+func GetAbantetherBuyPrices() prices {
+	buyPriceCrawler := crawlType{
+		englishName:    "Aban tether",
+		persianName:    "آبان تتر",
+		baseWebsiteUrl: "https://abantether.com/",
+		isSellPrice:    false,
+	}
+	return base(buyPriceCrawler)
+}
+
+func GetArazpayaSellPrices() prices {
+	sellPriceCrawler := crawlType{
+		englishName:    "Arzpaya",
+		persianName:    "ارزپایا",
+		baseWebsiteUrl: "https://arzpaya.com/",
+		isSellPrice:    true,
+	}
+	return base(sellPriceCrawler)
+}
+
+func GetArazpayaBuyPrices() prices {
+	buyPriceCrawler := crawlType{
+		englishName:    "Arzpaya",
+		persianName:    "ارزپایا",
+		baseWebsiteUrl: "https://arzpaya.com/",
+		isSellPrice:    false,
+	}
+	return base(buyPriceCrawler)
+}
 func checkErr(err error) {
 	if err != nil {
 		fmt.Println(err)
