@@ -28,10 +28,12 @@ type website struct {
 }
 
 func (website *website) sellPrice() prices {
+	website.isSellPrice = true
 	return baseCrawler(website)
 }
 
 func (website *website) buyPrice() prices {
+	website.isSellPrice = false
 	return baseCrawler(website)
 }
 
@@ -116,9 +118,15 @@ func baseCrawler(website *website) prices {
 		crawlType = "buyers"
 	}
 
+	crawlerPriceByLink := doc.Find("#RWPCS-usdt-table-" + crawlType + " tr a[href^='" + website.baseWebsiteUrl + "']").Parent().Parent().Find("td:nth-child(2)").Text()
+
+	if len(crawlerPriceByLink) == 0 {
+		crawlerPriceByLink = doc.Find("#RWPCS-usdt-table-" + crawlType + " tr img[src^='/wp-content/plugins/arzexio/images/" + website.baseWebsiteUrl + "']").Parent().Parent().Find("td:nth-child(2)").Text()
+	}
+
 	price, err := strconv.Atoi(
 		removeTomanFromText(
-			doc.Find("#RWPCS-usdt-table-" + crawlType + " tr a[href^='" + website.baseWebsiteUrl + "']").Parent().Parent().Find("td:nth-child(2)").Text(),
+			crawlerPriceByLink,
 		),
 	)
 
