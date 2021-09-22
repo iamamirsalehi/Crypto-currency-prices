@@ -135,7 +135,4 @@ func main() {
 		persianName:    "رمزاکس",
 		baseWebsiteUrl: "ramzex",
 	}*/
-
-	//fmt.Println(bitex24.buyPrice())
-
 }

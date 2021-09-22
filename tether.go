@@ -99,7 +99,7 @@ func checkErr(err error) {
 
 func baseCrawler(website *website) prices {
 	var crawlType string
-
+	var crawlerPriceByLink string
 	baseUrl := "https://arzex.io/tether"
 
 	netClient := GetClient()
@@ -118,9 +118,9 @@ func baseCrawler(website *website) prices {
 		crawlType = "buyers"
 	}
 
-	crawlerPriceByLink := doc.Find("#RWPCS-usdt-table-" + crawlType + " tr a[href^='" + website.baseWebsiteUrl + "']").Parent().Parent().Find("td:nth-child(2)").Text()
-
-	if len(crawlerPriceByLink) == 0 {
+	if strings.Contains(website.baseWebsiteUrl, "http"){
+		crawlerPriceByLink = doc.Find("#RWPCS-usdt-table-" + crawlType + " tr a[href^='" + website.baseWebsiteUrl + "']").Parent().Parent().Find("td:nth-child(2)").Text()
+	}else{
 		crawlerPriceByLink = doc.Find("#RWPCS-usdt-table-" + crawlType + " tr img[src^='/wp-content/plugins/arzexio/images/" + website.baseWebsiteUrl + "']").Parent().Parent().Find("td:nth-child(2)").Text()
 	}
 
