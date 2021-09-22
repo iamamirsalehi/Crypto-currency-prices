@@ -9,17 +9,30 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
+type priceCrawler interface {
+	sellPrice() prices
+	buyPrice() prices
+}
+
 type prices struct {
 	englishName string
 	persianName string
 	price       int
 }
 
-type crawlType struct {
+type website struct {
 	englishName    string
 	persianName    string
 	baseWebsiteUrl string
 	isSellPrice    bool
+}
+
+func (website *website) sellPrice() prices {
+	return baseCrawler(website)
+}
+
+func (website *website) buyPrice() prices {
+	return baseCrawler(website)
 }
 
 func GetArzexBestBuyPrices() prices {
@@ -75,106 +88,6 @@ func GetArzexBestSellPrices() prices {
 	return prices
 }
 
-func GetNobitexSellPrices() prices {
-	buyPriceCrawler := crawlType{
-		englishName:    "Nobitex",
-		persianName:    "نوبیتکس",
-		baseWebsiteUrl: "https://nobitex.ir/",
-		isSellPrice:    true,
-	}
-
-	return base(buyPriceCrawler)
-}
-
-func GetNobitexBuyPrices() prices {
-	buyPriceCrawler := crawlType{
-		englishName:    "Nobitex",
-		persianName:    "نوبیتکس",
-		baseWebsiteUrl: "https://nobitex.ir/",
-		isSellPrice:    false,
-	}
-	return base(buyPriceCrawler)
-}
-
-func GetPhinixSellPrices() prices {
-	sellPriceCrawler := crawlType{
-		englishName:    "Phinix",
-		persianName:    "فینیکس",
-		baseWebsiteUrl: "https://phinix.ir/",
-		isSellPrice:    true,
-	}
-	return base(sellPriceCrawler)
-}
-
-func GetPhinixBuyPrices() prices {
-	buyPriceCrawler := crawlType{
-		englishName:    "Phinix",
-		persianName:    "فینیکس",
-		baseWebsiteUrl: "https://phinix.ir/",
-		isSellPrice:    false,
-	}
-	return base(buyPriceCrawler)
-}
-
-func GetTabdealSellPrices() prices {
-	sellPriceCrawler := crawlType{
-		englishName:    "Tabdeal",
-		persianName:    "تبدیل",
-		baseWebsiteUrl: "https://tabdeal.org/",
-		isSellPrice:    true,
-	}
-	return base(sellPriceCrawler)
-}
-
-func GetTabdealBuyPrices() prices {
-	buyPriceCrawler := crawlType{
-		englishName:    "Tabdeal",
-		persianName:    "تبدیل",
-		baseWebsiteUrl: "https://tabdeal.org/",
-		isSellPrice:    false,
-	}
-	return base(buyPriceCrawler)
-}
-
-func GetAbantetherSellPrices() prices {
-	sellPriceCrawler := crawlType{
-		englishName:    "Aban tether",
-		persianName:    "آبان تتر",
-		baseWebsiteUrl: "https://abantether.com/",
-		isSellPrice:    true,
-	}
-	return base(sellPriceCrawler)
-}
-
-func GetAbantetherBuyPrices() prices {
-	buyPriceCrawler := crawlType{
-		englishName:    "Aban tether",
-		persianName:    "آبان تتر",
-		baseWebsiteUrl: "https://abantether.com/",
-		isSellPrice:    false,
-	}
-	return base(buyPriceCrawler)
-}
-
-func GetArazpayaSellPrices() prices {
-	sellPriceCrawler := crawlType{
-		englishName:    "Arzpaya",
-		persianName:    "ارزپایا",
-		baseWebsiteUrl: "https://arzpaya.com/",
-		isSellPrice:    true,
-	}
-	return base(sellPriceCrawler)
-}
-
-func GetArazpayaBuyPrices() prices {
-	buyPriceCrawler := crawlType{
-		englishName:    "Arzpaya",
-		persianName:    "ارزپایا",
-		baseWebsiteUrl: "https://arzpaya.com/",
-		isSellPrice:    false,
-	}
-	return base(buyPriceCrawler)
-}
 func checkErr(err error) {
 	if err != nil {
 		fmt.Println(err)
@@ -182,7 +95,7 @@ func checkErr(err error) {
 	}
 }
 
-func base(crawlerInfo crawlType) prices {
+func baseCrawler(website *website) prices {
 	var crawlType string
 
 	baseUrl := "https://arzex.io/tether"
@@ -197,7 +110,7 @@ func base(crawlerInfo crawlType) prices {
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	checkErr(err)
 
-	if crawlerInfo.isSellPrice == true {
+	if website.isSellPrice == true {
 		crawlType = "sellers"
 	} else {
 		crawlType = "buyers"
@@ -205,13 +118,13 @@ func base(crawlerInfo crawlType) prices {
 
 	price, err := strconv.Atoi(
 		removeTomanFromText(
-			doc.Find("#RWPCS-usdt-table-" + crawlType + " tr a[href^='" + crawlerInfo.baseWebsiteUrl + "']").Parent().Parent().Find("td:nth-child(2)").Text(),
+			doc.Find("#RWPCS-usdt-table-" + crawlType + " tr a[href^='" + website.baseWebsiteUrl + "']").Parent().Parent().Find("td:nth-child(2)").Text(),
 		),
 	)
 
 	return prices{
-		englishName: crawlerInfo.englishName,
-		persianName: crawlerInfo.persianName,
+		englishName: website.englishName,
+		persianName: website.persianName,
 		price:       price,
 	}
 }
